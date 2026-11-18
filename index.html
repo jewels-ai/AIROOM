@@ -10,8 +10,8 @@
   <script src="https://cdn.8thwall.com/web/aframe/8frame-1.5.0.min.js"></script>
   <script src="https://cdn.8thwall.com/web/xrextras/xrextras.js"></script>
 
-  <!-- Self-Hosted 8th Wall XR Engine Binary (Make sure xr.js is in your AIROOM folder) -->
-  <script async src="./xr.js"></script>
+  <!-- Self-Hosted 8th Wall XR Engine Binary with SLAM chunk preloaded -->
+  <script async src="./xr.js" data-preload-chunks="slam"></script>
 
   <style>
     body { 
@@ -21,7 +21,7 @@
       background: #0f172a;
     }
 
-    /* Custom Branded Loading Screen (Replaces xrextras-loading & removes 8th Wall badge) */
+    /* Custom Branded Loading Screen */
     #custom-loader {
       position: fixed;
       inset: 0;
@@ -48,7 +48,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Backup CSS just in case any default branding injects */
     .poweredby-img, #poweredByLogo, #loadingContainer {
       display: none !important;
     }
@@ -73,7 +72,7 @@
       white-space: nowrap;
     }
 
-    /* Bottom Theme Switcher Dock (Hidden until floor is anchored) */
+    /* Bottom Theme Switcher Dock */
     #theme-dock {
       position: fixed; 
       bottom: 28px; 
@@ -129,7 +128,6 @@
   </style>
 
   <script>
-    // Custom Component: Handles Loader Dismissal & Tap-to-Place 360° Room Anchor
     AFRAME.registerComponent('room-anchor-manager', {
       init: function () {
         const scene = this.el;
@@ -183,7 +181,6 @@
         }
       });
 
-      // Update active button styling
       document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
     }
@@ -191,7 +188,7 @@
 </head>
 
 <body>
-  <!-- Custom Loading Screen (No 8th Wall Branding) -->
+  <!-- Custom Loading Screen -->
   <div id="custom-loader">
     <div class="spinner"></div>
     <p style="margin-top: 16px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;">Initializing AR Room...</p>
@@ -207,7 +204,7 @@
     <button class="theme-btn" onclick="switchTheme('ocean', this)">🌊 Ocean</button>
   </div>
 
-  <!-- 8th Wall World Effects Scene (xrextras-loading removed) -->
+  <!-- 8th Wall World Effects Scene -->
   <a-scene
     room-anchor-manager
     xrextras-gesture-detector
@@ -216,6 +213,27 @@
     renderer="colorManagement: true"
     xrweb="allowedDevices: any">
 
+    <!-- =================================================================== -->
+    <!-- PRELOADED 3D ASSETS (Matching your exact AIROOM folder paths)       -->
+    <!-- =================================================================== -->
+    <a-assets timeout="15000">
+      <!-- Forest Models -->
+      <a-asset-item id="model-pine-tree" src="./assets/models/forest/pine_tree/pine_tree.glb"></a-asset-item>
+      <a-asset-item id="model-pond" src="./assets/models/forest/pond/pond.glb"></a-asset-item>
+      <a-asset-item id="model-waterfall" src="./assets/models/forest/waterfall/waterfall.glb"></a-asset-item>
+
+      <!-- Mountain Models -->
+      <a-asset-item id="model-boulder" src="./assets/models/mountain/boulder/boulder.glb"></a-asset-item>
+      <a-asset-item id="model-campfire" src="./assets/models/mountain/campfire/campfire.glb"></a-asset-item>
+      <a-asset-item id="model-eagle" src="./assets/models/mountain/eagle/eagle.glb"></a-asset-item>
+      <a-asset-item id="model-snow-peak" src="./assets/models/mountain/snow_peak/snow_peak.glb"></a-asset-item>
+
+      <!-- Ocean Models -->
+      <a-asset-item id="model-coral-reef" src="./assets/models/ocean/coral_reef/coral_reef.glb"></a-asset-item>
+      <a-asset-item id="model-sea-turtle" src="./assets/models/ocean/sea_turtle/sea_turtle.glb"></a-asset-item>
+      <a-asset-item id="model-whale" src="./assets/models/ocean/whale/whale.glb"></a-asset-item>
+    </a-assets>
+
     <!-- Camera & Ground Raycaster -->
     <a-camera position="0 1.6 0" raycaster="objects: .ground-plane" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
 
@@ -223,8 +241,8 @@
     <a-plane class="ground-plane" position="0 0 0" rotation="-90 0 0" width="50" height="50" visible="false"></a-plane>
 
     <!-- Ambient & Directional Lighting -->
-    <a-light type="ambient" intensity="0.85"></a-light>
-    <a-light type="directional" position="2 5 3" intensity="0.9"></a-light>
+    <a-light type="ambient" intensity="0.9"></a-light>
+    <a-light type="directional" position="2 5 3" intensity="1.0"></a-light>
 
     <!-- =================================================================== -->
     <!-- ROOM ORIGIN (0, 0, 0) - Everything below anchors to your floor tap  -->
@@ -233,38 +251,53 @@
 
       <!-- THEME 1: FOREST (Active by default) -->
       <a-entity id="theme-forest" visible="true">
-        <!-- Back-Left Corner Tree -->
-        <a-cone position="-2.5 1.5 -3.5" radius-bottom="1" height="3" color="#15803d"></a-cone>
-        <!-- Back-Right Corner Tree -->
-        <a-cone position="2.5 1.8 -3.5" radius-bottom="1.2" height="3.6" color="#166534"></a-cone>
+        <!-- Back-Left Corner Pine Tree -->
+        <a-gltf-model src="#model-pine-tree" position="-2.2 0 -3.2" scale="1 1 1"></a-gltf-model>
+        <!-- Back-Right Corner Waterfall -->
+        <a-gltf-model src="#model-waterfall" position="2.2 0 -3.2" rotation="0 -35 0" scale="1 1 1"></a-gltf-model>
         <!-- Center Floor Pond -->
-        <a-cylinder position="0 0.05 -1.5" radius="0.9" height="0.1" color="#0ea5e9"></a-cylinder>
-        <!-- Overhead Floating Firefly -->
-        <a-sphere position="-0.8 2.4 -2" radius="0.12" color="#fde047" animation="property: position; to: -0.6 2.7 -2; dir: alternate; loop: true; dur: 2000"></a-sphere>
-        <!-- Behind User (Turn around 180° to see) -->
-        <a-cone position="1.5 1.4 2.5" radius-bottom="0.9" height="2.8" color="#14532d"></a-cone>
+        <a-gltf-model src="#model-pond" position="0 0 -1.5" scale="1 1 1"></a-gltf-model>
+        <!-- Behind User Pine Tree (Turn around 180° to see) -->
+        <a-gltf-model src="#model-pine-tree" position="1.5 0 2.2" rotation="0 160 0" scale="0.9 0.9 0.9"></a-gltf-model>
       </a-entity>
 
       <!-- THEME 2: MOUNTAIN -->
       <a-entity id="theme-mountain" visible="false">
         <!-- Back-Left Snowy Peak -->
-        <a-cone position="-2.5 2 -3.8" radius-bottom="1.8" height="4" color="#64748b"></a-cone>
-        <!-- Back-Right Snowy Peak -->
-        <a-cone position="2.5 2.2 -3.8" radius-bottom="2" height="4.4" color="#475569"></a-cone>
+        <a-gltf-model src="#model-snow-peak" position="-2.3 0 -3.5" rotation="0 25 0" scale="1 1 1"></a-gltf-model>
+        <!-- Back-Right Boulder Cluster -->
+        <a-gltf-model src="#model-boulder" position="2.1 0 -3.0" rotation="0 -40 0" scale="1 1 1"></a-gltf-model>
         <!-- Center Floor Campfire -->
-        <a-cone position="0 0.35 -1.5" radius-bottom="0.4" height="0.7" color="#f97316" animation="property: scale; to: 1.1 1.25 1.1; dir: alternate; loop: true; dur: 600"></a-cone>
-        <!-- Overhead Drifting Cloud -->
-        <a-box position="0.5 2.6 -2.2" width="1.6" height="0.35" depth="0.9" color="#f8fafc" opacity="0.85"></a-box>
+        <a-gltf-model src="#model-campfire" position="0 0 -1.5" scale="1 1 1"></a-gltf-model>
+        <!-- Overhead Soaring Eagle -->
+        <a-gltf-model 
+          src="#model-eagle" 
+          position="0 2.3 -2.2" 
+          scale="0.8 0.8 0.8"
+          animation="property: position; from: -2.0 2.3 -2.2; to: 2.0 2.5 -2.2; dir: alternate; loop: true; dur: 4500">
+        </a-gltf-model>
       </a-entity>
 
       <!-- THEME 3: OCEAN -->
       <a-entity id="theme-ocean" visible="false">
-        <!-- Coral Reef Left -->
-        <a-dodecahedron position="-2.2 0.6 -3.2" radius="0.7" color="#f43f5e"></a-dodecahedron>
-        <!-- Coral Reef Right -->
-        <a-dodecahedron position="2.2 0.7 -3.2" radius="0.8" color="#a855f7"></a-dodecahedron>
-        <!-- Overhead Swimming Whale / Fish Placeholder -->
-        <a-box position="0 2.3 -2.5" width="1.8" height="0.5" depth="0.6" color="#0284c7" animation="property: position; from: -2.5 2.3 -2.5; to: 2.5 2.3 -2.5; dir: alternate; loop: true; dur: 4500"></a-box>
+        <!-- Left Coral Reef -->
+        <a-gltf-model src="#model-coral-reef" position="-2.0 0 -3.0" scale="1 1 1"></a-gltf-model>
+        <!-- Right Coral Reef (Mirrored/Rotated for variety) -->
+        <a-gltf-model src="#model-coral-reef" position="2.0 0 -3.0" rotation="0 120 0" scale="0.9 0.9 0.9"></a-gltf-model>
+        <!-- Mid-Floor Swimming Sea Turtle -->
+        <a-gltf-model 
+          src="#model-sea-turtle" 
+          position="0 0.8 -1.8" 
+          scale="0.8 0.8 0.8"
+          animation="property: position; from: -1.2 0.8 -1.8; to: 1.2 1.0 -1.8; dir: alternate; loop: true; dur: 5000">
+        </a-gltf-model>
+        <!-- Overhead Swimming Whale -->
+        <a-gltf-model 
+          src="#model-whale" 
+          position="0 2.4 -2.5" 
+          scale="1 1 1"
+          animation="property: position; from: -2.5 2.4 -2.5; to: 2.5 2.4 -2.5; dir: alternate; loop: true; dur: 6500">
+        </a-gltf-model>
       </a-entity>
 
     </a-entity>
